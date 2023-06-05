@@ -65,6 +65,73 @@ public class server implements Runnable {
 						while (true) {
 							String action = in.readUTF();
 							switch (action) {
+							case "login":
+
+								String logininfo = in.readUTF();
+								c = null;
+								BufferedReader buff = new BufferedReader(new StringReader(logininfo));
+
+								String line;
+								while ((line = buff.readLine()) != null) {
+									if (line.isEmpty()) {
+										continue;
+									} 
+									String[] com = line.split(",");
+									user1 = com[0];
+									pw1 = com[1];
+
+								}
+
+								try {
+									DriverManager.registerDriver(new com.mysql.jdbc.Driver());
+									
+									c = DriverManager.getConnection(url, username, password);
+
+									Statement stmt = c.createStatement();
+
+									String sql = "select * from qlks.taikhoan";
+									ResultSet rs = stmt.executeQuery(sql);
+
+									int a = 0;
+									while (rs.next()) {
+										String user = rs.getString("user");
+										String pw = rs.getString("pw");
+										System.out.print(user1 + pw1 + "server");
+
+										if (user1.equals(user) && pw1.equals(pw)) {
+											a += 1;
+
+										}
+
+									}
+
+									if (a == 0) {
+
+										for (Customer client : clients) {
+
+											DataOutputStream outputStream = new DataOutputStream(
+													client.getSocket().getOutputStream());
+											outputStream.writeUTF("login");
+											outputStream.writeUTF("loginfalse");
+
+										}
+									} else {
+
+										DataOutputStream outputStream = new DataOutputStream(
+												clientSocket.getOutputStream());
+										outputStream.writeUTF("login");
+										outputStream.writeUTF("loginsuccess");
+
+									}
+									rs.close();
+									stmt.close();
+									c.close();
+								} catch (SQLException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
+break;
+						
 							
 							case "add":
 								String nameadd = in.readUTF();
